@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monterrial POS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Sistema de punto de venta para negocios peruanos: ventas, inventario, caja y boletas y facturas electrónicas SUNAT. Funciona sin internet.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230d1b13'/%3E%3Cpath d='M8 10h3l3 11h9l2-8H12' fill='none' stroke='%232bee79' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="src/styles.css">
+<!-- Sin build: el navegador resuelve las librerías desde jsDelivr. -->
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+  "lenis":"https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.mjs"
+}}
+</script>
+</head>
+<body>
+
+<!-- Escenario fijo: un solo mostrador 3D vive detrás de toda la página y viaja entre secciones -->
+<canvas id="scene" aria-label="Mostrador 3D: toca un producto para escanearlo o el botón Cobrar del monitor"></canvas>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#inicio" aria-label="Monterrial POS, inicio">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 10h3l3 11h9l2-8H12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="25" r="1.8" fill="currentColor"/><circle cx="22" cy="25" r="1.8" fill="currentColor"/></svg></span>
+    Monterrial <b>POS</b>
+  </a>
+  <nav class="links" aria-label="Secciones">
+    <a href="#rubros">Rubros</a>
+    <a href="#funciones">Funciones</a>
+    <a href="#sunat">SUNAT</a>
+    <a href="#preguntas">Preguntas</a>
+  </nav>
+  <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true" aria-label="Sonido del mostrador">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <a class="btn small dark" href="#contacto">Pedir demo</a>
+</header>
+
+<main id="main">
+
+<!-- ═══ Hero ═══ -->
+<section class="sec hero" id="inicio" data-pose="hero" data-screen="pos">
+  <div class="wrap">
+    <div class="copy">
+      <p class="eyebrow"><span class="dot"></span> Sistema de punto de venta hecho en Perú</p>
+      <h1>Cobra en segundos.<br><span class="hl">Factura con SUNAT</span> sin enredos.</h1>
+      <p class="lede">Monterrial POS junta ventas, inventario, caja y comprobantes electrónicos en un solo sistema. Funciona en tu computadora aunque se caiga el internet.</p>
+      <div class="actions">
+        <a class="btn primary" href="#contacto">Quiero una demo gratis</a>
+        <a class="btn ghost" href="#funciones">Ver cómo funciona</a>
+      </div>
+      <ul class="proof">
+        <li><b>Boletas y facturas</b> electrónicas</li>
+        <li><b>Yape, Plin</b>, tarjeta, efectivo y fiado</li>
+        <li><b>Windows y Android</b></li>
+      </ul>
+    </div>
+    <div class="try" aria-live="polite">
+      <p class="try-title">Pruébalo aquí mismo</p>
+      <p>Toca un producto flotando para escanearlo. Después toca <span class="kbd">Cobrar</span> en el monitor y mira salir la boleta.</p>
+      <div class="try-row">
+        <span class="ticker"><b id="cartCount">3</b> productos · <b id="cartTotal">S/ 24.40</b></span>
+        <button class="btn small primary" id="payBtn" type="button">Cobrar <span class="kbd on-green">F4</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Rubros ═══ -->
+<section class="sec rubros" id="rubros" data-pose="rubros" data-screen="pos">
+  <div class="wrap">
+    <div class="col-l panel">
+      <p class="eyebrow">Un sistema, muchos rubros</p>
+      <h2>Se adapta a lo que vendes.</h2>
+      <p class="lead">Al instalarlo eliges tu tipo de negocio y el sistema activa lo que necesitas: lotes y vencimientos en una botica, venta por metro en una ferretería, órdenes de trabajo en un taller. Elige uno y mira cómo cambia el monitor.</p>
+      <div class="rubro-grid" role="group" aria-label="Tipo de negocio">
+        <button class="rubro" type="button" data-rubro="bodega" aria-pressed="true"><b>Bodega y minimarket</b><span>Venta rápida, fiado, granel por kilo</span></button>
+        <button class="rubro" type="button" data-rubro="ferreteria" aria-pressed="false"><b>Ferretería</b><span>Metro, kilo y conversiones de unidades</span></button>
+        <button class="rubro" type="button" data-rubro="botica" aria-pressed="false"><b>Botica y farmacia</b><span>Lotes, vencimientos y FEFO automático</span></button>
+        <button class="rubro" type="button" data-rubro="polleria" aria-pressed="false"><b>Pollería y restaurante</b><span>Combos, platos y promociones</span></button>
+        <button class="rubro" type="button" data-rubro="lavanderia" aria-pressed="false"><b>Lavandería</b><span>Cobro por kilo o por prenda</span></button>
+        <button class="rubro" type="button" data-rubro="taller" aria-pressed="false"><b>Taller y servicio técnico</b><span>Órdenes de trabajo con seguimiento</span></button>
+        <button class="rubro" type="button" data-rubro="hostal" aria-pressed="false"><b>Hostal y hotel</b><span>Habitaciones, consumos y servicios</span></button>
+        <button class="rubro" type="button" data-rubro="tech" aria-pressed="false"><b>Accesorios y tecnología</b><span>Stock por modelo y código de barras</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Funciones: el monitor se queda a la izquierda y cambia de pantalla ═══ -->
+<div id="funciones">
+  <section class="sec feat" data-pose="feat" data-screen="pos">
+    <div class="wrap"><div class="col-r panel">
+      <p class="eyebrow"><span class="step-n">1 de 4</span> Vender</p>
+      <h2>Una venta en tres teclas.</h2>
+      <p class="lead">Busca con <span class="kbd">F2</span> o pasa el lector de código de barras, ajusta cantidades y cobra con <span class="kbd">F4</span>. <span class="kbd">F8</span> abre una venta nueva.</p>
+      <ul class="ticks">
+        <li>Vende fracciones: medio kilo de azúcar, 12 metros de cable, una tableta suelta.</li>
+        <li>Presentaciones con su propio precio: unidad, paquete, caja o saco.</li>
+        <li>Modo táctil con botones grandes para pantallas touch.</li>
+        <li>Descuentos con <span class="kbd">F6</span>, cupones y promociones automáticas.</li>
+      </ul>
+    </div></div>
+  </section>
+  <section class="sec feat" data-pose="feat" data-screen="inventario">
+    <div class="wrap"><div class="col-r panel">
+      <p class="eyebrow"><span class="step-n">2 de 4</span> Inventario</p>
+      <h2>Sabes qué tienes y qué se acaba.</h2>
+      <p class="lead">El stock baja solo con cada venta. El sistema te avisa cuando un producto está por agotarse o por vencer.</p>
+      <ul class="ticks">
+        <li>Importa tu lista de productos desde Excel o CSV.</li>
+        <li>Órdenes de compra y registro de proveedores.</li>
+        <li>Lotes con fecha de vencimiento; vende primero lo que vence primero.</li>
+        <li>Catálogo global de productos para cargar tu tienda más rápido.</li>
+      </ul>
+    </div></div>
+  </section>
+  <section class="sec feat" data-pose="feat" data-screen="caja">
+    <div class="wrap"><div class="col-r panel">
+      <p class="eyebrow"><span class="step-n">3 de 4</span> Caja y turnos</p>
+      <h2>La caja cuadra al final del día.</h2>
+      <p class="lead">Cada cajero abre y cierra su turno. Ves cuánto entró en efectivo, Yape, Plin y tarjeta, y cuánto quedó por cobrar.</p>
+      <ul class="ticks">
+        <li>Fiado por cliente con saldo pendiente y abonos.</li>
+        <li>Ingresos y egresos de caja con su motivo.</li>
+        <li>Usuarios con permisos: el dueño ve todo, el cajero solo vende.</li>
+      </ul>
+    </div></div>
+  </section>
+  <section class="sec feat" data-pose="feat" data-screen="reportes">
+    <div class="wrap"><div class="col-r panel">
+      <p class="eyebrow"><span class="step-n">4 de 4</span> Reportes</p>
+      <h2>Decide con números, no a ojo.</h2>
+      <p class="lead">Ventas por día y por hora, productos más vendidos, márgenes y cierres de turno. Todo se exporta a Excel para tu contador.</p>
+      <ul class="ticks">
+        <li>Registro de cada anulación y cambio de precio.</li>
+      </ul>
+    </div></div>
+  </section>
+</div>
+
+<!-- ═══ SUNAT: la ticketera al frente ═══ -->
+<section class="sec sunat" id="sunat" data-pose="sunat" data-screen="sunat">
+  <div class="wrap">
+    <div class="col-l panel">
+      <p class="eyebrow">Facturación electrónica</p>
+      <h2>La boleta sale de la caja y llega a SUNAT.</h2>
+      <p class="lead">Eliges boleta o factura al cobrar. El sistema arma el XML, lo firma con tu certificado digital, lo envía a SUNAT y guarda la constancia de recepción (CDR).</p>
+      <ul class="docs" aria-label="Comprobantes que emite">
+        <li>Boleta de venta</li><li>Factura</li><li>Nota de crédito</li><li>Comunicación de baja</li><li>Resumen diario</li>
+      </ul>
+      <dl class="facts">
+        <div><dt>IGV</dt><dd>18% calculado en cada línea</dd></div>
+        <div><dt>ICBPER</dt><dd>Impuesto a la bolsa plástica incluido</dd></div>
+        <div><dt>Ticket</dt><dd>Impresora térmica USB, de red o Bluetooth, con QR</dd></div>
+        <div><dt>Sin internet</dt><dd>Los envíos quedan en cola y salen cuando vuelve la conexión</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Más funciones ═══ -->
+<section class="sec more" data-pose="away">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Además</p>
+      <h2>Lo que piden los negocios que crecen.</h2>
+    </div>
+    <div class="more-grid">
+      <article class="opaque">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12l9-9 9 9-9 9z M12 8v8 M8 12h8"/></svg>
+        <h3>Promociones automáticas</h3>
+        <p>Por categoría, por volumen ("3 a S/ 10") o la segunda unidad a mitad de precio. Se aplican solas al cobrar.</p>
+      </article>
+      <article class="opaque">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M10 18h4"/></svg>
+        <h3>Catálogo online</h3>
+        <p>Tus productos publicados en un enlace propio. Tus clientes eligen y te piden por WhatsApp.</p>
+      </article>
+      <article class="opaque">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l4 4-9 9H5v-4z M12 8l4 4"/></svg>
+        <h3>Órdenes de trabajo</h3>
+        <p>Recibe equipos, registra el diagnóstico, avisa cuando está listo y conviértelo en venta.</p>
+      </article>
+      <article class="opaque">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z M4 7l2-4h12l2 4 M9 11h6"/></svg>
+        <h3>Compras y proveedores</h3>
+        <p>Órdenes de compra que suman stock al recibir la mercadería.</p>
+      </article>
+      <article class="opaque">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z M12 11v6 M9.5 13.5L12 11l2.5 2.5"/></svg>
+        <h3>Respaldos en la nube</h3>
+        <p>Copias automáticas de tu información. Si cambias de computadora, la restauras.</p>
+      </article>
+      <article class="opaque">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z M9 12l2 2 4-4"/></svg>
+        <h3>Farmacia completa</h3>
+        <p>Registro sanitario, libro de controlados, recetas e interacciones entre medicamentos.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Dónde funciona ═══ -->
+<section class="sec multi" data-pose="multi" data-screen="pos">
+  <div class="wrap">
+    <div class="col-l panel">
+      <p class="eyebrow">Dónde funciona</p>
+      <h2>En el mostrador, en el celular y en la nube.</h2>
+      <div class="where">
+        <div><h3>Computadora Windows</h3><p>Se instala con su propia base de datos. Si se va el internet, sigues vendiendo.</p></div>
+        <div><h3>Celular Android</h3><p>App para vender o revisar tu negocio desde el teléfono.</p></div>
+        <div><h3>Nube, si la quieres</h3><p>Respaldos automáticos y varias tiendas conectadas.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Cómo empezamos ═══ -->
+<section class="sec steps" data-pose="away">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Cómo empezamos</p>
+      <h2>De la demo a tu primera venta.</h2>
+    </div>
+    <ol class="step-list">
+      <li class="opaque"><span class="num">1</span><h3>Demo con tu negocio</h3><p>Te mostramos el sistema por videollamada o en tu local, con productos de tu rubro.</p></li>
+      <li class="opaque"><span class="num">2</span><h3>Instalación y carga</h3><p>Instalamos el sistema, conectamos tu impresora y cargamos tus productos desde Excel.</p></li>
+      <li class="opaque"><span class="num">3</span><h3>Capacitación y soporte</h3><p>Enseñamos a tu equipo a vender, cerrar caja y emitir comprobantes. Seguimos contigo después.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══ Preguntas ═══ -->
+<section class="sec faq" id="preguntas" data-pose="away">
+  <div class="wrap narrow">
+    <div class="sec-head">
+      <p class="eyebrow">Preguntas frecuentes</p>
+      <h2>Lo que nos preguntan antes de empezar.</h2>
+    </div>
+    <div class="faq-list">
+      <details class="opaque"><summary>¿Necesito internet para vender?</summary><p>No. El sistema de escritorio guarda todo en tu computadora. Necesitas conexión solo para enviar comprobantes a SUNAT y para los respaldos en la nube; si se corta, quedan en cola y se envían después.</p></details>
+      <details class="opaque"><summary>¿Qué necesito para emitir boletas y facturas?</summary><p>Tu RUC, usuario secundario SOL y un certificado digital. Te ayudamos a configurarlo y a hacer las pruebas antes de pasar a producción.</p></details>
+      <details class="opaque"><summary>¿Qué impresora y lector de códigos puedo usar?</summary><p>Impresoras térmicas de tickets por USB, red o Bluetooth, y cualquier lector de código de barras que funcione como teclado.</p></details>
+      <details class="opaque"><summary>¿Puedo pasar mis productos desde Excel?</summary><p>Sí. Importamos tu lista con precios, stock y categorías. También puedes partir del catálogo de productos peruanos que trae el sistema.</p></details>
+      <details class="opaque"><summary>¿Puedo tener más de un cajero o más de una tienda?</summary><p>Sí. Cada usuario tiene su propio acceso y permisos, cada cajero su turno, y las tiendas se pueden conectar en la nube.</p></details>
+      <details class="opaque"><summary>¿Puedo probarlo antes de comprar?</summary><p>Sí. Agenda una demo y te lo mostramos funcionando con productos de tu rubro.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Contacto ═══ -->
+<section class="sec contact" id="contacto" data-pose="contact" data-screen="pos">
+  <div class="wrap">
+    <div class="col-r">
+      <form class="contact-card opaque" id="contactForm" novalidate>
+        <p class="eyebrow">Agenda tu demo</p>
+        <h2>Te lo mostramos con tus productos.</h2>
+        <p class="lead small">Déjanos tus datos y te escribimos por WhatsApp para coordinar el día.</p>
+        <div class="fields">
+          <label for="fName">Tu nombre<input id="fName" name="nombre" autocomplete="name" required placeholder="Ej. Rosa Quispe"></label>
+          <label for="fBiz">Nombre del negocio<input id="fBiz" name="negocio" autocomplete="organization" placeholder="Ej. Minimarket Rosita"></label>
+          <label for="fType">Rubro
+            <select id="fType" name="rubro">
+              <option value="bodega">Bodega o minimarket</option>
+              <option value="ferreteria">Ferretería</option>
+              <option value="botica">Botica o farmacia</option>
+              <option value="polleria">Pollería o restaurante</option>
+              <option value="lavanderia">Lavandería</option>
+              <option value="taller">Taller o servicio técnico</option>
+              <option value="hostal">Hostal u hotel</option>
+              <option value="tech">Accesorios o tecnología</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+          <label for="fCity">Ciudad<input id="fCity" name="ciudad" autocomplete="address-level2" placeholder="Ej. Huancayo"></label>
+          <label class="full" for="fMsg">¿Qué te gustaría ver en la demo?<textarea id="fMsg" name="mensaje" rows="3" placeholder="Ej. Necesito emitir boletas y controlar el fiado"></textarea></label>
+        </div>
+        <p class="form-error" id="formError" role="alert" hidden>Escribe tu nombre para poder saludarte.</p>
+        <div class="form-actions">
+          <a class="btn primary wa" id="waLink" href="#" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>
+            Enviar por WhatsApp
+          </a>
+          <button class="btn ghost" id="copyBtn" type="button">Copiar mensaje</button>
+        </div>
+        <p class="contact-alt" id="contactAlt"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="foot-word" aria-hidden="true">Monterrial<span>POS</span></p>
+    <div class="foot-row">
+      <p>Sistema de punto de venta para negocios peruanos.</p>
+      <p>Las pantallas y comprobantes de esta página usan datos de ejemplo.</p>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
